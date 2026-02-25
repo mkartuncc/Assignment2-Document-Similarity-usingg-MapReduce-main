@@ -1,0 +1,3 @@
+Document1 This is a sample document containing words
+Document2 No sample documents here
+Document3 Lost of testing to do
