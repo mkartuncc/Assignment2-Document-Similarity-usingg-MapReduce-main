@@ -2,20 +2,23 @@
 
 **Name:** 
 Medha Karthik
+
 **Student ID:** 
 801238132
+
 ## Approach and Implementation
 
 ### Mapper Design
-[Explain the logic of your Mapper class. What is its input key-value pair? What does it emit as its output key-value pair? How does it help in solving the overall problem?]
+
+The Mapper class follows the logic of transforming the input into pairs of documents with their word sets. The input key-value pair is the Document ID followed by the text in the document. The mapper reads each document, extracts the document ID and its set of words, and stores them in memory. After reading all documents, the mapper generates all unique pairs of document IDs. The class emits as its output key-value pair the key and the two sets of words (one from each document) as the value. This helps in solving the overall proble by preparing the data for the reducer, which will calculate the Jaccard similarity for each document pair using the word sets provided.
 
 ### Reducer Design
-[Explain the logic of your Reducer class. What is its input key-value pair? How does it process the values for a given key? What does it emit as the final output? How do you calculate the Jaccard Similarity here?]
+
+The Reducer class transforms the word sets into a meaningful similarity metric that quantifies how similar the two documents are, based on vocabulary. The input key-value pair is a pair of documents and the words from both documents, separated by a pipe. Values for a given key are processed as follows: the reducer class iterates through each value and splits by "|" to separate the documents word sets. Then, two HashSet objects are created to store the words from each document. The function retainAll() is used to generate a set of common words between the two documents, and the function addAll() is used to generate a set of all unique words from both documents. These values are then divided to calculate the Jaccard Similarity score. The final output is the document pair and their similarity. 
 
 ### Overall Data Flow
-[Describe how data flows from the initial input files, through the Mapper, shuffle/sort phase, and the Reducer to produce the final output.]
 
----
+Data begins flowing from the initial raw text documents, in this case input.txt, which holds all of the documents. The Mapper is used to read each line from the input file and extract the document ID and its words. Then, in the shuffle/sort phase, all of the values are grouped by their key (the document pair) before being sent to the Reducer. The Reducer computes the Jaccard similarity for each pair and then produces the final output.
 
 ## Setup and Execution
 
@@ -83,7 +86,7 @@ hadoop fs -put ./input.txt /input/data
 
 ### 7. **Execute the MapReduce Job**
 
-Run your MapReduce job using the following command: Here I got an error saying output already exists so I changed it to output1 instead as destination folder
+Run your MapReduce job using the following command: Here I got an error saying output already exists so I changed it to output2 instead as destination folder
 
 ```bash
 hadoop jar /opt/hadoop-3.2.1/share/hadoop/mapreduce/DocumentSimilarity-0.0.1-SNAPSHOT.jar com.example.controller.DocumentSimilarityDriver /input/data/input.txt /output2
@@ -122,23 +125,20 @@ To copy the output from HDFS to your local machine:
 
 ## Challenges and Solutions
 
-[Describe any challenges you faced during this assignment. This could be related to the algorithm design (e.g., how to generate pairs), implementation details (e.g., data structures, debugging in Hadoop), or environmental issues. Explain how you overcame these challenges.]
+The biggest challenge I faced while completing this assignment was with my environment. When initially creating my file structure, I had incorrectly nested the driver, mapper, and reducer java files in \src\main\com\example. This caused a ClassNotFoundException when I was attempting to execute the map reduce job, as my JAR did not contain the compiled class in the correct package structure, a common source folder structure problem with Maven. To overcome this challenge, I restructured my repository to include \src\main\java\com\example, which allowed the code to run correctly. 
 
 ---
-## Sample Input
+## Input
 
-**Input from `small_dataset.txt`**
+**Input from `input.txt`**
 ```
 Document1 This is a sample document containing words
-Document2 Another document that also has words
-Document3 Sample text with different words
+Document2 No sample documents here
+Document3 Lost of testing to do
+
 ```
 ## Sample Output
-
-**Output from `small_dataset.txt`**
 ```
-"Document1, Document2 Similarity: 0.56"
-"Document1, Document3 Similarity: 0.42"
-"Document2, Document3 Similarity: 0.50"
-```
-## Obtained Output: (Place your obtained output here.)
+Document2,Document1	Similarity: 0.18
+Document3,Document1	Similarity: 0.20
+Document3,Document2	Similarity: 0.10
